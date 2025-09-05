@@ -112,7 +112,13 @@ jobs:
 
       - name: Build Extension
         run: |
-          (cd continue/packages/config-yaml && npm run build)
+          # scripts/build-packages.sh is the legacy way of building packages
+          if [ -f continue/scripts/build-packages.sh ]; then
+            (cd continue && chmod +x scripts/build-packages.sh && ./scripts/build-packages.sh)
+          else
+            (cd continue && node ./scripts/build-packages.js)
+          fi
+
           npm run build
 
       - name: Create Packages
