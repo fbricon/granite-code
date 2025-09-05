@@ -142,7 +142,6 @@ jobs:
             -i build/*win32-x64*.vsix
 
       - name: Set release variables
-        if: ${{ inputs.skip_publication == false }}
         id: set_release_variables
         run: |
           VERSION=$(jq -r .version package.json)
@@ -157,7 +156,6 @@ jobs:
           fi
 
       - name: Create or Update GitHub Release
-        if: ${{ inputs.skip_publication == false }}
         id: create_or_update_release
         uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 # v2.3.2
         with:
