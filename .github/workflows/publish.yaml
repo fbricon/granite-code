@@ -112,13 +112,8 @@ jobs:
 
       - name: Build Extension
         run: |
-          # scripts/build-packages.sh is the legacy way of building packages
-          if [ -f continue/scripts/build-packages.sh ]; then
-            (cd continue && chmod +x scripts/build-packages.sh && ./scripts/build-packages.sh)
-          else
-            (cd continue && node ./scripts/build-packages.js)
-          fi
-
+          (cd continue/packages/openai-adapters && npm run build)
+          (cd continue/packages/config-yaml && npm run build)
           npm run build
 
       - name: Create Packages
@@ -161,6 +156,16 @@ jobs:
             echo "prerelease=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Delete existing "development" release
+        id: delete_development_release
+        if: inputs.is_snapshot == true
+        run: |
+          if gh release list --json tagName --jq '.[].tagName' | grep -q 'development'; then
+            gh release delete development --yes
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       - name: Create or Update GitHub Release
         id: create_or_update_release
         uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 # v2.3.2
@@ -170,7 +175,6 @@ jobs:
           prerelease: ${{ steps.set_release_variables.outputs.prerelease }}
           draft: false
           generate_release_notes: false
-          overwrite_files: true
           files: build/*.vsix
           token: ${{ secrets.GITHUB_TOKEN }}
 
